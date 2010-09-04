@@ -408,6 +408,15 @@ class IRCUser
 	def r_pong(message)
 	end
 	
+	# VERSION command
+	def r_version(target)
+		if (target.nil? || idwn(target) == idwn(@serv.name))
+			s_reply(351,"0.0 " + @serv.name + " :Server running ruby-ircd")
+		else
+			s_reply(402,target + " :No such server")
+		end
+	end
+	
 	# REHASH command
 	def r_rehash
 		s_reply(382,"noconfigfile :Rehashing")
@@ -554,6 +563,8 @@ class IRCUser
 			end
 		when "PONG"
 			r_pong(args[0])	# nil if no parameter
+		when "VERSION"
+			r_version(args[0])
 		when "REHASH"
 			r_rehash
 		else
