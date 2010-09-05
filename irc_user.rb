@@ -1,5 +1,21 @@
 #!/usr/bin/ruby
 
+# ruby-ircd :: IRC Server
+# Copyright (C) 2010 Brendon Duncan
+
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as
+# published by the Free Software Foundation, either version 3 of the
+# License, or (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
 # irc_user.rb
 # Contains the IRCUser class
 
@@ -411,7 +427,8 @@ class IRCUser
 	# VERSION command
 	def r_version(target)
 		if (target.nil? || idwn(target) == idwn(@serv.name))
-			s_reply(351,"0.0 " + @serv.name + " :Server running ruby-ircd")
+			s_reply(351,"0.0 " + @serv.name + " :Server running ruby-ircd <" + $SourceURL + ">")
+			s_reply(351,"0.0 " + @serv.name + " :ruby-ircd is licensed under the GNU Affero General Public License version 3 (see: http://www.gnu.org/licenses/)")
 		else
 			s_reply(402,target + " :No such server")
 		end
