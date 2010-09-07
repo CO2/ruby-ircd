@@ -35,9 +35,10 @@ class IRCServer
 	@channels = nil		# Channels
 	@bans = nil			# Banlist
 	@opers = nil		# Operator username/password combos
+	@autojoins = nil	# Channels for users to automatically join upon registration
 	@configfile = nil	# Configuration file filename
 	
-	attr_accessor :name,:sock,:users,:clients,:channels,:bans,:opers,:configfile
+	attr_accessor :name,:sock,:users,:clients,:channels,:bans,:opers,:autojoins,:configfile
 	
 	# Constructor
 	def initialize(name,cfgfile,ip = "0.0.0.0",port = 6667)
@@ -48,6 +49,7 @@ class IRCServer
 		@clients = []
 		@bans = []
 		@opers = []
+		@autojoins = []
 		@configfile = cfgfile
 		begin
 			rehash
@@ -60,19 +62,28 @@ class IRCServer
 	def rehash
 		@bans = []
 		@opers = []
-		File.read(@configfile).split(/(\r\n|\n)+/).each do |line|
-			ex = line.split(':')
+		@autojoins = []
+		File.read(@configfile).chomp.split(/[\r\n]+/).each do |line|
+			ex = line.chomp.split(':')
 			case ex[0]
 			when "OPER"
 				if (ex.size <= 3)
-					puts "Not enough config options for OPER."
+					puts "rehash: Not enough config options for OPER."
 				else
 					@opers += [[ex[1],ex[2],Regexp::new(ex[3])]]
+				end
+			when "AUTOJOIN"
+				if (ex.size <= 1)
+					puts "rehash: Not enough config options for AUTOJOIN."
+				elsif (!(ex[1] =~ $ChanMatch))
+					puts "rehash: Invalid channel name for AUTOJOIN."
+				else
+					@autojoins += [ex[1]]
 				end
 			when nil
 			when ""
 			else
-				puts "Unknown config line " + ex[0] + "."
+				puts "rehash: Unknown config line " + ex[0] + "."
 			end
 		end
 	end

@@ -136,3 +136,13 @@ OPER lines control the OPER command
 - `hostname` is a regular expression that must match the hostname of the user attempting to use OPER
 
 Example: `OPER:Jeff:nobodywillguessthisever:.*`
+
+
+### AUTOJOIN Line ###
+Channels on AUTOJOIN lines are automatically joined by users once they register with USER and NICK
+
+`AUTOJOIN:channel`
+
+- `channel` is the name of the channel to join
+
+Example: `AUTOJOIN:#lobby`

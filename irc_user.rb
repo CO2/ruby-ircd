@@ -95,7 +95,9 @@ class IRCUser
 		s_reply(003,":This server was created sometimeidontrememberwhen")
 		s_reply(004,[@serv.name,"0","",""].join(' '))
 		s_reply(422,":MOTD File is missing")
-		r_join("#lobby")
+		@serv.autojoins.each do |this|
+			r_join(this)
+		end
 	end
 	
 	# Send a numeric reply
