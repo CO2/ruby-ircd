@@ -28,16 +28,17 @@ $ChannelLimit = 10
 # A user connected to this server
 
 class IRCUser
-	@serv = nil
-	@sock = nil
-	@nickname = nil
-	@username = nil
-	@hostname = nil
-	@realname = nil
-	@channels = nil
-	@didpong = nil
+	@serv = nil		# Server
+	@sock = nil		# Socket
+	@nickname = nil	# Nickname
+	@username = nil	# Username
+	@hostname = nil	# Hostname
+	@realname = nil	# Realname
+	@channels = nil	# Channels
+	@didpong = nil	# Sent a PONG reply to last PING
+	@oper = nil		# IRC Operator
 	
-	attr_accessor :nickname, :username, :hostname, :realname, :channels
+	attr_accessor :nickname, :username, :hostname, :realname, :channels, :oper
 	
 	# Constructor
 	def initialize(server,sock)
@@ -46,6 +47,7 @@ class IRCUser
 		@hostname = sock.peeraddr[2]
 		@channels = {}
 		@didpong = true
+		@oper = false
 		clientcount = 0
 		@serv.users.each_value do |this|
 			if (!this.nil?)
@@ -149,6 +151,26 @@ class IRCUser
 				this.s_nick(prefix,newnick)
 			end
 			@nickname = newnick
+		end
+	end
+	
+	# OPER command
+	def r_oper(username,password)
+		opforhost = false
+		@serv.opers.each do |this|
+			if (hostname =~ this[2])
+				opforhost = true
+			end
+			if (idwn(this[0]) == idwn(username) && this[1] == password && @hostname =~ this[2])
+				s_reply(381,"You are now an IRC operator")
+				@oper = true
+				return
+			end
+		end
+		if (opforhost)
+			s_reply(464,":User or Password incorrect")
+		else
+			s_reply(491,":No OPER lines for your host")
 		end
 	end
 	
@@ -311,7 +333,7 @@ class IRCUser
 			s_reply(442,channel + " :You're not on that channel")
 			return
 		end
-		if (!thischan.ops.include?(self))
+		if (!thischan.ops.include?(self) && !@oper)
 			s_reply(482,channel + " :You're not a channel operator")
 			return
 		end
@@ -367,7 +389,7 @@ class IRCUser
 			s_reply(442,channel + " :You're not on that channel")
 			return
 		end
-		if (!@serv.channels[idwn(channel)].ops.include?(self))
+		if (!@serv.channels[idwn(channel)].ops.include?(self) && !@oper)
 			s_reply(482,channel + " :You're not a channel operator")
 			return
 		end
@@ -468,7 +490,12 @@ class IRCUser
 	
 	# REHASH command
 	def r_rehash
-		s_reply(382,"noconfigfile :Rehashing")
+		begin
+			@serv.rehash
+			s_reply(382,@serv.configfile + " :Rehashing")
+		rescue
+			s_reply(382,@serv.configfile + " :Rehash failed")
+		end
 		load 'irc.rb'
 		load 'irc_channel.rb'
 		load 'irc_user.rb'
@@ -491,7 +518,7 @@ class IRCUser
 			s_reply(442,channel + " :You're not on that channel")
 			return
 		end
-		if (!thischan.ops.include?(self))
+		if (!thischan.ops.include?(self) && !@oper)
 			s_reply(482,channel + " :You're not a channel operator")
 			return
 		end
@@ -525,7 +552,7 @@ class IRCUser
 			s_reply(442,channel + " :You're not on that channel")
 			return
 		end
-		if (!thischan.ops.include?(self))
+		if (!thischan.ops.include?(self) && !@oper)
 			s_reply(482,channel + " :You're not a channel operator")
 			return
 		end
@@ -559,7 +586,7 @@ class IRCUser
 			s_reply(442,channel + " :You're not on that channel")
 			return
 		end
-		if (!thischan.ops.include?(self))
+		if (!thischan.ops.include?(self) && !@oper)
 			s_reply(482,channel + " :You're not a channel operator")
 			return
 		end
@@ -643,6 +670,12 @@ class IRCUser
 				s_reply(431,":No nickname given")
 			else
 				r_nick(args[0])
+			end
+		when "OPER"
+			if (args.size < 2)
+				s_reply(461,command + " :Not enough paramaters")
+			else
+				r_oper(args[0],args[1])
 			end
 		when "PRIVMSG"
 			if (args.size < 2)

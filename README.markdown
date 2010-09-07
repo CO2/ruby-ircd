@@ -12,6 +12,7 @@ ruby-ircd does not support all IRC commands (yet). The following is a list of al
 ### Registration ###
 - USER
 - NICK
+- OPER
 - QUIT
 
 ### Messaging ###
@@ -40,7 +41,6 @@ The following is a list of commands not yet implemented:
 
 ### Registration ###
 - PASS
-- OPER
 - MODE (User)
 * AWAY
 - SERVICE
@@ -116,3 +116,25 @@ Gives the user with `nickname` voice in `channel`.
 `NORMAL channel nickname`
 
 Removes chanop and voice status from user with `nickname` in `channel`.
+
+
+## Configuration File ##
+The configuration file has lines storing simple configuration information like:
+
+`LINENAME:parameter 1:parameter 2:parameter 3:etc`
+
+`LINENAME` must be in allcaps
+
+
+### OPER Line ###
+OPER lines control the OPER command
+
+`OPER:user:pass:hostname`
+
+`user` is the first parameter given to the OPER command
+`pass` is the second parameter given to the OPER command
+`hostname` is a regular expression that must match the hostname of the user attempting to use OPER
+
+Example:
+
+`OPER:Jeff:nobodywillguessthisever:.*`

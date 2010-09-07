@@ -28,21 +28,53 @@ require 'irc_channel.rb'
 # An instance of the irc server
 
 class IRCServer
-	@name = nil		# Server name
-	@sock = nil		# Socket
-	@users = nil	# Registered users
-	@clients = nil	# Unregistered clients
-	@channels = nil	# Channels
+	@name = nil			# Server name
+	@sock = nil			# Socket
+	@users = nil		# Registered users
+	@clients = nil		# Unregistered clients
+	@channels = nil		# Channels
+	@bans = nil			# Banlist
+	@opers = nil		# Operator username/password combos
+	@configfile = nil	# Configuration file filename
 	
-	attr_accessor :name,:sock,:users,:clients,:channels
+	attr_accessor :name,:sock,:users,:clients,:channels,:bans,:opers,:configfile
 	
 	# Constructor
-	def initialize(name,ip = "0.0.0.0",port = 6667)
+	def initialize(name,cfgfile,ip = "0.0.0.0",port = 6667)
 		@name = name
 		@sock = TCPServer::new(ip,port)
 		@users = {}
 		@channels = {}
 		@clients = []
+		@bans = []
+		@opers = []
+		@configfile = cfgfile
+		begin
+			rehash
+		rescue
+			puts "Failed to read/parse configuration file."
+		end
+	end
+	
+	# Parse configuration file
+	def rehash
+		@bans = []
+		@opers = []
+		File.read(@configfile).split(/(\r\n|\n)+/).each do |line|
+			ex = line.split(':')
+			case ex[0]
+			when "OPER"
+				if (ex.size <= 3)
+					puts "Not enough config options for OPER."
+				else
+					@opers += [[ex[1],ex[2],Regexp::new(ex[3])]]
+				end
+			when nil
+			when ""
+			else
+				puts "Unknown config line " + ex[0] + "."
+			end
+		end
 	end
 	
 	# Process events

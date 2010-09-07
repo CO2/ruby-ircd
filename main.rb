@@ -23,7 +23,7 @@ require 'irc_server.rb'
 
 PingTimeout = 120	# 2 minutes per ping request
 UpdateDelay = 0.1	# 10 updates per second
-serv = IRCServer::new("RubyServ")
+serv = IRCServer::new("RubyServ","./ircd.conf")
 lastping = PingTimeout
 
 begin
