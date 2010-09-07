@@ -23,6 +23,7 @@ ruby-ircd does not support all IRC commands (yet). The following is a list of al
 - PART
 - KICK
 - TOPIC
+- NAMES
 + CHANOP
 + VOICE
 + NORMAL
@@ -68,7 +69,6 @@ The following is a list of commands not yet implemented:
 - WHOIS
 - WHOWAS
 - LUSERS
-- NAMES
 * USERHOST
 * ISON
 

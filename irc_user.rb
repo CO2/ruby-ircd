@@ -380,6 +380,33 @@ class IRCUser
 		end
 	end
 	
+	# NAMES command
+	def r_names(channels,target)
+		if (target.nil? || idwn(target) == idwn(@serv.name))
+			channels.split(',').each do |channel|
+				thischan = @serv.channels[idwn(channel)]
+				if (thischan.nil?)
+					next
+				end
+				if (!thischan.users.include?(self))
+					next
+				end
+				thischan.ops.each do |this|
+					s_reply(353,"= " + channel + " :@" + this.nickname)
+				end
+				thischan.voices.each do |this|
+					s_reply(353,"= " + channel + " :+" + this.nickname)
+				end
+				thischan.norms.each do |this|
+					s_reply(353,"= " + channel + " :" + this.nickname)
+				end
+				s_reply(366,channel + " :End of NAMES list")
+			end
+		else
+			s_reply(402,target + " :No such server")
+		end
+	end
+	
 	# QUIT command
 	def s_quit(source,message)
 		send(":" + source + " QUIT :" + message)
@@ -672,6 +699,12 @@ class IRCUser
 				r_topic_read(args[0])
 			elsif (args.size == 2)
 				r_topic(args[0],args[1])
+			end
+		when "NAMES"
+			if (args.size < 1)
+				s_reply(999,":ERR_TOOMANYMATCHES")
+			else
+				r_names(args[0],args[1])
 			end
 		when "QUIT"
 			if (args.size < 1)
