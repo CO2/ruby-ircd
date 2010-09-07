@@ -334,6 +334,11 @@ class IRCUser
 		thisuser.channels[idwn(channel)] = nil
 	end
 	
+	# MODE command
+	def s_mode(source,target,string)
+		send(":" + source + " MODE " + target + " " + string)
+	end
+	
 	# TOPIC command
 	def s_topic(source,channel,topic)
 		if (topic.nil?)
@@ -446,6 +451,108 @@ class IRCUser
 	# ERROR command
 	def s_error(message)
 		send("ERROR :" + message)
+	end
+	
+	# CHANOP command
+	def r_chanop(channel,user)
+		thischan = @serv.channels[idwn(channel)]
+		if (thischan.nil?)
+			s_reply(401,channel + " :No such nick/channel")
+			return
+		end
+		if (!thischan.users.include?(self))
+			s_reply(442,channel + " :You're not on that channel")
+			return
+		end
+		if (!thischan.ops.include?(self))
+			s_reply(482,channel + " :You're not a channel operator")
+			return
+		end
+		thisuser = @serv.users[idwn(user)]
+		if (thisuser.nil?)
+			s_reply(401,user + " :No such nick/channel")
+			return
+		end
+		if (!thischan.users.include?(thisuser))
+			s_reply(441,user + " " + channel + " :They aren't on that channel")
+			return
+		end
+		thischan.users.each do |this|
+			this.s_mode(prefix,channel,"-v " + user)
+			this.s_mode(prefix,channel,"+o " + user)
+		end
+		thischan.ops -= [thisuser]
+		thischan.voices -= [thisuser]
+		thischan.norms -= [thisuser]
+		thischan.ops += [thisuser]
+	end
+	
+	# VOICE command
+	def r_voice(channel,user)
+		thischan = @serv.channels[idwn(channel)]
+		if (thischan.nil?)
+			s_reply(401,channel + " :No such nick/channel")
+			return
+		end
+		if (!thischan.users.include?(self))
+			s_reply(442,channel + " :You're not on that channel")
+			return
+		end
+		if (!thischan.ops.include?(self))
+			s_reply(482,channel + " :You're not a channel operator")
+			return
+		end
+		thisuser = @serv.users[idwn(user)]
+		if (thisuser.nil?)
+			s_reply(401,user + " :No such nick/channel")
+			return
+		end
+		if (!thischan.users.include?(thisuser))
+			s_reply(441,user + " " + channel + " :They aren't on that channel")
+			return
+		end
+		thischan.users.each do |this|
+			this.s_mode(prefix,channel,"-o " + user)
+			this.s_mode(prefix,channel,"+v " + user)
+		end
+		thischan.ops -= [thisuser]
+		thischan.voices -= [thisuser]
+		thischan.norms -= [thisuser]
+		thischan.voices += [thisuser]
+	end
+	
+	# NORMAL command
+	def r_normal(channel,user)
+		thischan = @serv.channels[idwn(channel)]
+		if (thischan.nil?)
+			s_reply(401,channel + " :No such nick/channel")
+			return
+		end
+		if (!thischan.users.include?(self))
+			s_reply(442,channel + " :You're not on that channel")
+			return
+		end
+		if (!thischan.ops.include?(self))
+			s_reply(482,channel + " :You're not a channel operator")
+			return
+		end
+		thisuser = @serv.users[idwn(user)]
+		if (thisuser.nil?)
+			s_reply(401,user + " :No such nick/channel")
+			return
+		end
+		if (!thischan.users.include?(thisuser))
+			s_reply(441,user + " " + channel + " :They aren't on that channel")
+			return
+		end
+		thischan.users.each do |this|
+			this.s_mode(prefix,channel,"-o " + user)
+			this.s_mode(prefix,channel,"-v " + user)
+		end
+		thischan.ops -= [thisuser]
+		thischan.voices -= [thisuser]
+		thischan.norms -= [thisuser]
+		thischan.norms += [thisuser]
 	end
 	
 	# Accept input if there is any
@@ -584,6 +691,24 @@ class IRCUser
 			r_version(args[0])
 		when "REHASH"
 			r_rehash
+		when "CHANOP"
+			if (args.size < 2)
+				s_reply(461,command + " :Not enough parameters")
+			else
+				r_chanop(args[0],args[1])
+			end
+		when "VOICE"
+			if (args.size < 2)
+				s_reply(461,command + " :Not enough parameters")
+			else
+				r_voice(args[0],args[1])
+			end
+		when "NORMAL"
+			if (args.size < 2)
+				s_reply(461,command + " :Not enough parameters")
+			else
+				r_normal(args[0],args[1])
+			end
 		else
 			s_reply(421,command + " :Unknown command")
 		end

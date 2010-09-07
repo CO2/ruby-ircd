@@ -23,6 +23,9 @@ ruby-ircd does not support all IRC commands (yet). The following is a list of al
 - PART
 - KICK
 - TOPIC
++ CHANOP
++ VOICE
++ NORMAL
 
 ### Server Control ###
 - REHASH
@@ -89,3 +92,27 @@ The following is a list of other unsupported features:
 - JOIN with parameter 0 to part all channels
 - PART messages
 - Multiple servers connected in an IRC network
+
+
+## Special Commands ##
+The following is a list of non-standard commands:
+
+### CHANOP Command ###
+
+`CHANOP channel nickname`
+
+Makes the user with `nickname` a channel operator in `channel`.
+
+
+### VOICE Command ###
+
+`VOICE channel nickname`
+
+Gives the user with `nickname` voice in `channel`.
+
+
+### NORMAL Command ###
+
+`NORMAL channel nickname`
+
+Removes chanop and voice status from user with `nickname` in `channel`.
