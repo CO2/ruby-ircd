@@ -131,10 +131,8 @@ OPER lines control the OPER command
 
 `OPER:user:pass:hostname`
 
-`user` is the first parameter given to the OPER command
-`pass` is the second parameter given to the OPER command
-`hostname` is a regular expression that must match the hostname of the user attempting to use OPER
+- `user` is the first parameter given to the OPER command
+- `pass` is the second parameter given to the OPER command
+- `hostname` is a regular expression that must match the hostname of the user attempting to use OPER
 
-Example:
-
-`OPER:Jeff:nobodywillguessthisever:.*`
+Example: `OPER:Jeff:nobodywillguessthisever:.*`
