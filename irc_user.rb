@@ -492,16 +492,16 @@ class IRCUser
 	
 	# REHASH command
 	def r_rehash
+		load 'irc.rb'
+		load 'irc_channel.rb'
+		load 'irc_user.rb'
+		load 'irc_server.rb'
 		begin
 			@serv.rehash
 			s_reply(382,@serv.configfile + " :Rehashing")
 		rescue
 			s_reply(382,@serv.configfile + " :Rehash failed")
 		end
-		load 'irc.rb'
-		load 'irc_channel.rb'
-		load 'irc_user.rb'
-		load 'irc_server.rb'
 	end
 	
 	# ERROR command
