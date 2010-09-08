@@ -534,8 +534,12 @@ class IRCUser
 			return
 		end
 		thischan.users.each do |this|
-			this.s_mode(prefix,channel,"-v " + user)
-			this.s_mode(prefix,channel,"+o " + user)
+			if (thischan.voices.include?(thisuser))
+				this.s_mode(prefix,channel,"-v " + user)
+			end
+			if (!thischan.ops.include?(thisuser))
+				this.s_mode(prefix,channel,"+o " + user)
+			end
 		end
 		thischan.ops -= [thisuser]
 		thischan.voices -= [thisuser]
@@ -568,8 +572,12 @@ class IRCUser
 			return
 		end
 		thischan.users.each do |this|
-			this.s_mode(prefix,channel,"-o " + user)
-			this.s_mode(prefix,channel,"+v " + user)
+			if (thischan.ops.include?(thisuser))
+				this.s_mode(prefix,channel,"-o " + user)
+			end
+			if (!thischan.voices.include?(thisuser))
+				this.s_mode(prefix,channel,"+v " + user)
+			end
 		end
 		thischan.ops -= [thisuser]
 		thischan.voices -= [thisuser]
@@ -602,8 +610,12 @@ class IRCUser
 			return
 		end
 		thischan.users.each do |this|
-			this.s_mode(prefix,channel,"-o " + user)
-			this.s_mode(prefix,channel,"-v " + user)
+			if (thischan.ops.include?(thisuser))
+				this.s_mode(prefix,channel,"-o " + user)
+			end
+			if (thischan.voices.include?(thisuser))
+				this.s_mode(prefix,channel,"-v " + user)
+			end
 		end
 		thischan.ops -= [thisuser]
 		thischan.voices -= [thisuser]
