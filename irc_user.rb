@@ -693,11 +693,22 @@ class IRCUser
 			end
 			ex = line.split(' ',2)
 			command = ex[0]
-			if (ex.size > 1)
+			if (!ex[1].nil?)
 				ex = ex[1].split(":",2)
-				args = ex[0].split(' ')
+				if (!ex[0].nil?)
+					args = ex[0].split(' ')
+				end
 				if (ex.size > 1)
 					args += [ex[1]]
+				end
+			end
+			ex = args
+			args = []
+			ex.each do |this|
+				if (this.nil?)
+					args += ['']
+				else
+					args += [this]
 				end
 			end
 		end
