@@ -141,18 +141,20 @@ class IRCUser
 		else
 			@serv.users[idwn(@nickname)] = nil
 			@serv.users[idwn(newnick)] = self
-			visibles = [self]
-			@channels.each_value do |thischan|
-				if (!thischan.nil?)
-					thischan.users.each do |this|
-						visibles += [this]
+			@nickname = newnick
+			if (registered?)
+				visibles = [self]
+				@channels.each_value do |thischan|
+					if (!thischan.nil?)
+						thischan.users.each do |this|
+							visibles += [this]
+						end
 					end
 				end
+				visibles.uniq.each do |this|
+					this.s_nick(prefix,newnick)
+				end
 			end
-			visibles.uniq.each do |this|
-				this.s_nick(prefix,newnick)
-			end
-			@nickname = newnick
 		end
 	end
 	
@@ -181,6 +183,10 @@ class IRCUser
 		send(":" + source + " PRIVMSG " + target + " :" + message)
 	end
 	def r_privmsg(target,message)
+		if (!registered?)
+			s_reply(451,":You have not registered")
+			return
+		end
 		if (target =~ $NickMatch)
 			targnick = @serv.users[idwn(target)]
 			if (targnick.nil?)
@@ -211,6 +217,10 @@ class IRCUser
 		send(":" + source + " NOTICE " + target + " :" + message)
 	end
 	def r_notice(target,message)
+		if (!registered?)
+			s_reply(451,":You have not registered")
+			return
+		end
 		if (target =~ $NickMatch)
 			targnick = @serv.users[idwn(target)]
 			if (targnick.nil?)
@@ -326,6 +336,10 @@ class IRCUser
 		send(":" + source + " KICK " + channel + " " + user + " :" + reason)
 	end
 	def r_kick(channel,user,reason)
+		if (!registered?)
+			s_reply(451,":You have not registered")
+			return
+		end
 		thischan = @serv.channels[idwn(channel)]
 		if (thischan.nil?)
 			s_reply(401,channel + " :No such nick/channel")
@@ -372,6 +386,10 @@ class IRCUser
 		end
 	end
 	def r_topic_read(channel)
+		if (!registered?)
+			s_reply(451,":You have not registered")
+			return
+		end
 		if (@serv.channels[idwn(channel)].nil?)
 			s_reply(401,channel + " :No such nick/channel")
 			return
@@ -383,6 +401,10 @@ class IRCUser
 		end
 	end
 	def r_topic(channel,topic)
+		if (!registered?)
+			s_reply(451,":You have not registered")
+			return
+		end
 		if (@serv.channels[idwn(channel)].nil?)
 			s_reply(401,channel + " :No such nick/channel")
 			return
@@ -406,6 +428,10 @@ class IRCUser
 	
 	# NAMES command
 	def r_names(channels,target)
+		if (!registered?)
+			s_reply(451,":You have not registered")
+			return
+		end
 		if (target.nil? || idwn(target) == idwn(@serv.name))
 			channels.split(',').each do |channel|
 				thischan = @serv.channels[idwn(channel)]
@@ -511,6 +537,10 @@ class IRCUser
 	
 	# CHANOP command
 	def r_chanop(channel,user)
+		if (!registered?)
+			s_reply(451,":You have not registered")
+			return
+		end
 		thischan = @serv.channels[idwn(channel)]
 		if (thischan.nil?)
 			s_reply(401,channel + " :No such nick/channel")
@@ -549,6 +579,10 @@ class IRCUser
 	
 	# VOICE command
 	def r_voice(channel,user)
+		if (!registered?)
+			s_reply(451,":You have not registered")
+			return
+		end
 		thischan = @serv.channels[idwn(channel)]
 		if (thischan.nil?)
 			s_reply(401,channel + " :No such nick/channel")
@@ -587,6 +621,10 @@ class IRCUser
 	
 	# NORMAL command
 	def r_normal(channel,user)
+		if (!registered?)
+			s_reply(451,":You have not registered")
+			return
+		end
 		thischan = @serv.channels[idwn(channel)]
 		if (thischan.nil?)
 			s_reply(401,channel + " :No such nick/channel")
