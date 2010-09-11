@@ -109,9 +109,12 @@ class IRCServer
 		@users.each_value do |this|
 			if (!this.nil?)
 				if (this.local?)
-					this.s_error("Closing link [" + reason + "]")
+					this.r_quit(reason)
 				end
 			end
+		end
+		@clients.each do |this|
+			this.r_quit(reason)
 		end
 	end
 end
