@@ -686,17 +686,17 @@ class IRCUser
 		args = []
 		begin
 			if (line =~ /^:.*$/)	# Ignore the prefix if the client sends one
-				line = line.split(' ',2)[1]
+				line = line.split(/ /,2)[1]
 				if (line.nil?)
 					return			# If there is only a prefix, exit the function
 				end
 			end
-			ex = line.split(' ',2)
+			ex = line.split(/ /,2)
 			command = ex[0]
 			if (!ex[1].nil?)
 				ex = ex[1].split(":",2)
 				if (!ex[0].nil?)
-					args = ex[0].split(' ')
+					args = ex[0].split(/ /)
 				end
 				if (ex.size > 1)
 					args += [ex[1]]
