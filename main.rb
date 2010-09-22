@@ -38,6 +38,9 @@ begin
 					this.pingreq
 				end
 			end
+			serv.clients.each do |this|
+				this.pingreq
+			end
 		end
 	end
 rescue Interrupt

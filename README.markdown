@@ -32,6 +32,9 @@ ruby-ircd does not support all IRC commands (yet). The following is a list of al
 ### Server Control ###
 - REHASH
 
+### Network Control ###
+- KILL
+
 ### Miscellaneous ###
 - VERSION
 
@@ -62,7 +65,6 @@ The following is a list of commands not yet implemented:
 - CONNECT
 - SQUIT
 - TRACE
-- KILL
 
 ### User Queries ###
 - WHO

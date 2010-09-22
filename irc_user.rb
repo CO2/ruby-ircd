@@ -161,6 +161,9 @@ class IRCUser
 	# OPER command
 	def r_oper(username,password)
 		opforhost = false
+		if (!registered?)
+			s_reply(451,":You have not registered")
+		end
 		@serv.opers.each do |this|
 			if (hostname =~ this[2])
 				opforhost = true
@@ -491,6 +494,24 @@ class IRCUser
 		end
 	end
 	
+	# KILL command
+	def r_kill(target,reason)
+		if (!registered?)
+			s_reply(451,":You have not registered")
+			return
+		end
+		if (!@oper)
+			s_reply(481,":Permission Denied - You're not an IRC operator")
+			return
+		end
+		thisuser = @serv.users[idwn(target)]
+		if (thisuser.nil?)
+			s_reply(401,target + " :No such nick/channel")
+			return
+		end
+		thisuser.r_quit("Killed by " + nickname + " [" + reason + "]")
+	end
+	
 	# PING command
 	def s_ping(message)
 		send("PING " + message)
@@ -807,6 +828,12 @@ class IRCUser
 				r_quit(@nickname)
 			else
 				r_quit(args[0])
+			end
+		when "KILL"
+			if (args.size < 2)
+				s_reply(461,command + " :Not enough parameters")
+			else
+				r_kill(args[0],args[1])
 			end
 		when "PING"
 			if (args.size < 1)
