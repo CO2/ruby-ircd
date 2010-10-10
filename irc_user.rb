@@ -141,7 +141,6 @@ class IRCUser
 		else
 			@serv.users[idwn(@nickname)] = nil
 			@serv.users[idwn(newnick)] = self
-			@nickname = newnick
 			if (registered?)
 				visibles = [self]
 				@channels.each_value do |thischan|
@@ -155,6 +154,7 @@ class IRCUser
 					this.s_nick(prefix,newnick)
 				end
 			end
+			@nickname = newnick
 		end
 	end
 	
