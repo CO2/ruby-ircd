@@ -80,7 +80,11 @@ class IRCUser
 	
 	# Returns the prefix used in commands
 	def prefix
-		return @nickname + "!" + @username + "@" + @hostname
+		if (registered?)
+			return @nickname + "!" + @username + "@" + @hostname
+		else
+			return "Unregistered@" + @hostname
+		end
 	end
 	
 	# Inspect
@@ -699,7 +703,7 @@ class IRCUser
 	
 	# Parse input
 	def receive(line)
-		puts ">>> " + line
+		puts prefix + " >>> " + line
 		if (line.nil?)
 			return
 		end
@@ -882,7 +886,7 @@ class IRCUser
 	
 	# Send a line of text
 	def send(line)
-		puts "<<< " + line[0...510] + "\r\n"
+		puts prefix + " <<< " + line[0...510] + "\r\n"
 		begin
 			@sock.print(line[0...510] + "\r\n")
 		rescue	# If a problem occurs, silently fail
