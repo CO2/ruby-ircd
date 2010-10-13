@@ -30,6 +30,7 @@ $ChannelLimit = 10
 class IRCUser
 	@serv = nil		# Server
 	@sock = nil		# Socket
+	@buffer = nil	# Incoming command
 	@nickname = nil	# Nickname
 	@username = nil	# Username
 	@hostname = nil	# Hostname
@@ -44,6 +45,7 @@ class IRCUser
 	def initialize(server,sock)
 		@serv = server
 		@sock = sock
+		@buffer = ""
 		@hostname = sock.peeraddr[2]
 		@channels = {}
 		@didpong = true
@@ -696,7 +698,21 @@ class IRCUser
 				@sock.close
 				r_quit("EOF on Socket")
 			else
-				receive(@sock.gets[0...512].chomp)
+				incoming = @sock.read_nonblock(1024)
+				if (incoming.nil? || incoming == "")
+					return
+				else
+					@buffer += incoming
+					@ex = @buffer.split(/(\r\n)+/)
+					if @ex.size > 1
+						for i in 0..(@ex.size - 2)
+							if (@ex[i].chomp != "")
+								receive(@ex[i][0...510])
+							end
+						end
+					end
+					@buffer = @ex[-1]
+				end
 			end
 		end
 	end
@@ -719,7 +735,7 @@ class IRCUser
 			ex = line.split(/ /,2)
 			command = ex[0]
 			if (!ex[1].nil?)
-				ex = ex[1].split(":",2)
+				ex = ex[1].split(" :",2)
 				if (!ex[0].nil?)
 					args = ex[0].split(/ /)
 				end
@@ -886,7 +902,7 @@ class IRCUser
 	
 	# Send a line of text
 	def send(line)
-		puts prefix + " <<< " + line[0...510] + "\r\n"
+		puts prefix + " <<< " + line[0...510]
 		begin
 			@sock.print(line[0...510] + "\r\n")
 		rescue	# If a problem occurs, silently fail
